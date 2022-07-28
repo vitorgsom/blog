@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Página Inicial{% endblock %}
+
 {% block content %}
     {% for post in posts %}
         <article class="post">
@@ -16,5 +17,7 @@
         {% if not loop.last %}
             <hr>
         {% endif %}
+    {% else %}
+        <p class="no-posts">Ops.. There are no posts to display</p>
     {% endfor %}
 {% endblock %}
