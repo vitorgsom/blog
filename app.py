@@ -12,10 +12,9 @@ class Post(db.Model):
     __tablename__ = 'posts'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     title = db.Column(db.String(70), nullable=False)
-    body = db.Column(db.String(500), )
-    author = db.Column(db.String(40))
+    body = db.Column(db.String(500))
     created = db.Column(db.DateTime, nullable=False, default=datetime.now)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
 class User(db.Model):
     __tablename__ = "users"
@@ -25,19 +24,19 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     posts = db.relationship('Post', backref='author')
 
+
 db.create_all()
 
 @app.route("/")
 def index():
-    # Busca no banco os posts
     posts = Post.query.all()
     return render_template('index.html', posts=posts)
 
 @app.route("/populate")
 def populate():
     user = User(username='Vitor', email="vitor@gmail.com", password_hash='a')
-    post1 = Post(title="Post 1", body="Texto do Post", author="Vitor")
-    post2 = Post(title="Post 2", body="Texto do Post", author="Vitor")
+    post1 = Post(title="Post 1", body="Texto do Post", author=user)
+    post2 = Post(title="Post 2", body="Texto do Post", author=user)
     db.session.add(user)
     db.session.add(post1)
     db.session.add(post2)
