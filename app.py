@@ -1,12 +1,16 @@
 from flask import Flask, render_template, redirect, url_for
 from datetime import datetime
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from werkzeug.security import check_password_hash, generate_password_hash
 
 app = Flask("hello")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SECRET_KEY"] = "pudim"
 
 db = SQLAlchemy(app)
+login = LoginManager(app)
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -24,6 +28,16 @@ class User(db.Model):
     password_hash = db.Column(db.String(128), nullable=False)
     posts = db.relationship('Post', backref='author')
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_passwor(self, password):
+        return check_password_hash(self.password_hash, password)
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 
 db.create_all()
 
@@ -32,13 +46,6 @@ def index():
     posts = Post.query.all()
     return render_template('index.html', posts=posts)
 
-@app.route("/populate")
-def populate():
-    user = User(username='Vitor', email="vitor@gmail.com", password_hash='a')
-    post1 = Post(title="Post 1", body="Texto do Post", author=user)
-    post2 = Post(title="Post 2", body="Texto do Post", author=user)
-    db.session.add(user)
-    db.session.add(post1)
-    db.session.add(post2)
-    db.session.commit()
-    return redirect(url_for("index"))
+@app.route("/register")
+def register():
+    return render_template('register.html')
